@@ -5,6 +5,8 @@ go 1.19
 require github.com/go-resty/resty/v2 v2.7.0
 
 require (
+	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/rs/zerolog v1.29.1 // indirect

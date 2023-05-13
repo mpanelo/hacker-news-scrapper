@@ -8,15 +8,17 @@ import (
 )
 
 const (
-	baseURL     = "https://hacker-news.firebaseio.com"
-	version     = "v0"
-	maxItemPath = "/maxitem.json"
-	itemPath    = "/item"
+	baseURL        = "https://hacker-news.firebaseio.com"
+	version        = "v0"
+	maxItemPath    = "/maxitem.json"
+	itemPath       = "/item"
+	topStoriesPath = "/topstories.json"
 )
 
 type Client interface {
 	MaxItem() (int, error)
 	Item(int) (Item, error)
+	TopStories() ([]int, error)
 }
 
 type hnClient struct {
@@ -69,4 +71,14 @@ func (c *hnClient) Item(id int) (Item, error) {
 		Get(itemPath + "/{itemID}.json")
 
 	return item, err
+}
+
+func (c *hnClient) TopStories() ([]int, error) {
+	var itemIDs []int
+
+	_, err := c.client.R().
+		SetResult(&itemIDs).
+		Get(topStoriesPath)
+
+	return itemIDs, err
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/mpanelo/hacker-news-scraper/internal/data"
 	"github.com/mpanelo/hacker-news-scraper/internal/env"
 	"github.com/mpanelo/hacker-news-scraper/internal/hn"
 	"github.com/rs/zerolog"
@@ -15,8 +16,9 @@ import (
 )
 
 type application struct {
-	hnClient hn.Client
 	cfg      config
+	hnClient hn.Client
+	models   data.Models
 }
 
 type config struct {
@@ -53,22 +55,17 @@ func main() {
 
 	defer db.Close()
 
-	//app := NewApplication(cfg)
-	//items, err := app.TopStories()
-	//if err != nil {
-	//	log.Err(err).Msg("failed to get top stories")
-	//	return
-	//}
-
-	//for _, item := range items {
-	//	fmt.Println(item.Title)
-	//}
+	app := NewApplication(cfg, db)
+	if err := app.SaveTopStories(); err != nil {
+		log.Fatal().Err(err).Msg("failed to save top hacker news stories")
+	}
 }
 
-func NewApplication(cfg config) *application {
+func NewApplication(cfg config, db *sql.DB) *application {
 	return &application{
-		hnClient: hn.NewClient(),
 		cfg:      cfg,
+		hnClient: hn.NewClient(),
+		models:   data.NewModels(db),
 	}
 }
 
@@ -85,6 +82,7 @@ func openDB(cfg config) (*sql.DB, error) {
 	// Set the maximum number of idle connections in the pool. Again, passing a value
 	// less than or equal to 0 will mean there is no limit.
 	db.SetMaxIdleConns(cfg.db.maxIdleConns)
+
 	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
 	if err != nil {
 		return nil, err
